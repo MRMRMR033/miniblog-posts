@@ -3,5 +3,6 @@ model user {
     name String
     email String @unique()
     password String
-    posts post[]
+    posts post[] 
+    comment comment[]
 }

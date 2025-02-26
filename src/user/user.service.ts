@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -11,7 +12,7 @@ export class UserService {
 
   constructor(private prisma: PrismaService) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     try {
 
       const hashedPassword = await bcrypt.hash(createUserDto.password, this.saltRound)
@@ -30,7 +31,7 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<User[]> {
     try {
       return this.prisma.user.findMany()
     } catch {
@@ -39,7 +40,7 @@ export class UserService {
     }
   }
 
-  async findOneSignIn(email: string) {
+  async findOneSignIn(email: string): Promise<User> {
     try {
       return this.prisma.user.findUnique({ where: { email } })
     }
@@ -49,7 +50,7 @@ export class UserService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<User> {
     try {
       return this.prisma.user.findUnique({ where: { id }, include: { posts: { select: { title: true } } } })
     } catch {
@@ -58,7 +59,7 @@ export class UserService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       return await this.prisma.user.update({
         data: updateUserDto,
@@ -69,7 +70,7 @@ export class UserService {
     }
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<User> {
+    return this.prisma.user.delete({where: {id}})
   }
 }

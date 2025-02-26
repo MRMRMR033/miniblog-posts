@@ -5,5 +5,5 @@ generator client {
 
 datasource db {
     provider = "mysql"
-    url = "mysql://root:Tigre033@localhost:3306/miniblogdb"
+    url = env("DATABASE_URL")
 }

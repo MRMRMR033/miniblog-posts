@@ -8,14 +8,16 @@ import { UserPostGuard } from './guards/post.guard';
 @Injectable()
 export class PostService {
   constructor(private prisma: PrismaService){}
-  create(createPostDto: CreatePostDto & {userId: number}) {
-    return this.prisma.post.create({data: createPostDto})
+  
+  async create(createPostDto: CreatePostDto & {userId: number}) {
+    return await this.prisma.post.create({data: createPostDto})
   }
   async findAllByUser(id: number){
     return await this.prisma.post.findMany(
       {
         where: {userId: id},
         select: {
+          id: true,
           title: true,
           description: true,
           user: {
@@ -28,11 +30,22 @@ export class PostService {
   async findAll() {
     return await this.prisma.post.findMany({
       select: {
+        id: true,
         title: true,
         description: true,
         user: {
           select: {
             name: true
+          }
+        },
+        Comment: {
+          select: {
+            text: true,
+            user: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       }
@@ -40,7 +53,7 @@ export class PostService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.post.findUnique({where: {id}})
+    return await this.prisma.post.findUnique({where: {id}, })
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {
