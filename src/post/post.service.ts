@@ -15,7 +15,7 @@ export class PostService {
   async findAllByUser(id: number){
     return await this.prisma.post.findMany(
       {
-        where: {userId: id},
+        where: {userId: Number(id)},
         select: {
           id: true,
           title: true,
@@ -53,14 +53,18 @@ export class PostService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.post.findUnique({where: {id}, })
+    return await this.prisma.post.findUnique({
+      where: {id: Number(id)}, 
+      include: {
+        Comment: {select: {text: true, user: {select: {name: true}}}, 
+        }}})
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {
     try{
       return await this.prisma.post.update({
         data:updatePostDto,
-        where: {id}
+        where: {id: Number(id)}
       })
     }catch{
       throw new BadRequestException()
@@ -69,7 +73,7 @@ export class PostService {
 
   async remove(id: number) {
     try{
-      return await this.prisma.post.delete({where: {id}})
+      return await this.prisma.post.delete({where: {id: Number(id)}})
     }catch{
       throw new BadRequestException();
     }

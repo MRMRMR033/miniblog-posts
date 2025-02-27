@@ -2,7 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Request} from '@nest
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Public } from 'src/decorators/public.decorator';
+import { CommentEntity } from './entities/comment.entity';
 
+@ApiBearerAuth()
 @Controller('posts/:postId/comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -20,6 +24,8 @@ export class CommentController {
     })
   }
 
+  @Public()
+  @ApiResponse({status: 200, description: "encontrar todos los comentarios.", type: CommentEntity})
   @Get()
   findAll(@Param('postId') postId: number) {
     return this.commentService.findAll(postId);

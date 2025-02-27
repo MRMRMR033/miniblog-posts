@@ -17,7 +17,13 @@ export class CommentService {
 
   findAll(postId: number) {
     try{
-      return this.prismaService.comment.findMany({where: {postId: Number(postId)}})
+      return this.prismaService.comment.findMany({where: {postId: Number(postId)}, select:
+      {
+        id: true,
+        postId: true,
+        text: true,
+        user: {select: {name: true}}
+      }})
     }catch{
       throw new BadRequestException("Error al buscar todos los comentairos.")
     }
