@@ -11,6 +11,7 @@ import { CommentEntity } from './entities/comment.entity';
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
+  @ApiResponse({status: 201, description: "Creacion de post.", type: CommentEntity})
   @Post('')
   create(
     @Body() createCommentDto: CreateCommentDto,
@@ -25,12 +26,13 @@ export class CommentController {
   }
 
   @Public()
-  @ApiResponse({status: 200, description: "encontrar todos los comentarios.", type: CommentEntity})
+  @ApiResponse({status: 200, description: "encontrar todos los comentarios.", type: [CommentEntity]})
   @Get()
   findAll(@Param('postId') postId: number) {
     return this.commentService.findAll(postId);
   }
 
+  @ApiResponse({status: 200, description: "obtencion de un unico comentario.", type: CommentEntity})
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commentService.findOne(+id);

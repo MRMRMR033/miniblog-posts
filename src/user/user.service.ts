@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { User } from './entities/user.entity';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UserService {
@@ -16,7 +17,12 @@ export class UserService {
     try {
 
       const hashedPassword = await bcrypt.hash(createUserDto.password, this.saltRound)
+      const existingUser = await this.prisma.user.findUnique({where: {email: createUserDto.email}})
 
+      if(existingUser){
+        throw new ConflictException(`el correo ${createUserDto.email} ya esta en uso.`)
+      }
+      
       return this.prisma.user.create({
         data: {
           name: createUserDto.name,
@@ -25,9 +31,14 @@ export class UserService {
         }
       });
 
-    } catch {
-      console.log("Error al crear el usuario")
-      throw new BadRequestException("Usuario no encontrado")
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException(`El correo ${createUserDto.email} ya está en uso.`);
+        }
+      }
+      console.error('Error en UserService.create:', error);
+      throw new InternalServerErrorException('Ocurrió un error al crear el usuario.');
     }
   }
 

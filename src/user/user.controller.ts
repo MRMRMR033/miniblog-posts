@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, HttpStatus, HttpException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,11 +14,28 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
   
   @Public()
-  @ApiResponse({status: 201, description: "creacion del usario", type: User})
+  @ApiResponse({ status: 201, description: "Usuario creado con éxito", type: User })
+  @ApiResponse({ status: 409, description: "El correo electrónico ya está en uso." })
+  @ApiResponse({ status: 500, description: "Ocurrio un error al procesar la solicitud." })
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return await this.userService.create(createUserDto);
+    try {
+      return await this.userService.create(createUserDto);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new HttpException( 
+          { message: error.message, statusCode: HttpStatus.CONFLICT },
+          HttpStatus.CONFLICT
+        );
+      }
+      console.error("Error en userController.create", error)
+      throw new HttpException(
+        { message: "Ocurrió un error al procesar la solicitud.", statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
+
   @ApiBearerAuth()
   @ApiResponse({status: 200, description: "Lista de usuarios.", type: [User]})
   @Get()

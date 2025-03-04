@@ -7,12 +7,14 @@ export class UserRelation {
 }
 
 export class CommentEntity {
+
+    
     @ApiProperty()
     id: number
 
     @ApiProperty()
     postId: number
-    
+
     @ApiProperty()
     text: string
 
